@@ -8,7 +8,7 @@
 #define STR( x )        STR_HELPER(x)
 
 
-boolean Adafruit_VL53L0X::begin( boolean debug ) {
+boolean Adafruit_VL53L0X::begin( boolean debug , uint8_t deviceAddr) {
   int32_t   status_int;
   int32_t   init_done         = 0;
 
@@ -22,8 +22,13 @@ boolean Adafruit_VL53L0X::begin( boolean debug ) {
   pMyDevice->comms_type      =  1;
   pMyDevice->comms_speed_khz =  400;
 
-  Wire.begin();     // VL53L0X_i2c_init();
+  if (deviceAddr != VL53L0X_I2C_ADDR) {
+	  VL53L0X_SetDeviceAddress(pMyDevice, deviceAddr);
+	  pMyDevice->I2cDevAddr = deviceAddr;
+  }
 
+  //Wire.begin();     // VL53L0X_i2c_init();
+  
   // unclear if this is even needed:
   if( VL53L0X_IMPLEMENTATION_VER_MAJOR != VERSION_REQUIRED_MAJOR ||
       VL53L0X_IMPLEMENTATION_VER_MINOR != VERSION_REQUIRED_MINOR ||

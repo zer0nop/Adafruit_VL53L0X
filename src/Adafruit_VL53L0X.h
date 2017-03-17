@@ -28,7 +28,7 @@
 class Adafruit_VL53L0X
 {
   public:
-    boolean       begin( boolean debug = false );
+    boolean       begin( boolean debug = false , uint8_t deviceAddr = VL53L0X_I2C_ADDR);
     VL53L0X_Error 
       rangingTest(VL53L0X_RangingMeasurementData_t* pRangingMeasurementData, 
 		  boolean debug = false) 
