@@ -23,11 +23,12 @@
 #include "Wire.h"
 #include "vl53l0x_api.h"
 
-#define VL53L0X_I2C_ADDR  0x29
+#define VL53L0X_I2C_ADDR  0x29 // default VL53L0X I2C Address
 
 class Adafruit_VL53L0X
 {
   public:
+	Adafruit_VL53L0X(int xshutpin = -1);
     boolean       begin( boolean debug = false , uint8_t deviceAddr = VL53L0X_I2C_ADDR);
     VL53L0X_Error 
       rangingTest(VL53L0X_RangingMeasurementData_t* pRangingMeasurementData, 
@@ -36,8 +37,18 @@ class Adafruit_VL53L0X
 
     VL53L0X_Error getSingleRangingMeasurement( VL53L0X_RangingMeasurementData_t* pRangingMeasurementData, boolean debug = false );
     void          printRangeStatus( VL53L0X_RangingMeasurementData_t* pRangingMeasurementData );
+	
+	/**
+	* @brief Will return a boolean for whether Single Ranging Measurement was Valid.
+	*
+	* @param   reading     the sensor reading if valid reading, otherwise -1
+	* @param   goodRange   true if status = 0
+	* @return  boolean     true if it was a valid reading (status = 0 or status = 2)
+	*/
+	boolean getValidSingleRangingMeasurement(int &reading, bool &goodRange);
 
     VL53L0X_Error                     Status      = VL53L0X_ERROR_NONE;
+	int XShutPin;
 
  private:
   VL53L0X_Dev_t                       MyDevice;

@@ -7,8 +7,18 @@
 #define STR_HELPER( x ) #x
 #define STR( x )        STR_HELPER(x)
 
+Adafruit_VL53L0X::Adafruit_VL53L0X(int xshutpin) {
+  XShutPin = xshutpin; // set the xShut pin
+  if (XShutPin != -1) {
+    pinMode(XShutPin, OUTPUT); // turn off the sensor device
+  }
+}
 
 boolean Adafruit_VL53L0X::begin( boolean debug , uint8_t deviceAddr) {
+  if (XShutPin != -1) {
+	pinMode(XShutPin, INPUT); // turn on the sensor
+	delay(10);// give it a little time to start
+  }
   int32_t   status_int;
   int32_t   init_done         = 0;
 
@@ -140,6 +150,7 @@ boolean Adafruit_VL53L0X::begin( boolean debug , uint8_t deviceAddr) {
 }
 
 
+
 VL53L0X_Error Adafruit_VL53L0X::getSingleRangingMeasurement( VL53L0X_RangingMeasurementData_t *RangingMeasurementData, boolean debug )
 {
     VL53L0X_Error   Status = VL53L0X_ERROR_NONE;
@@ -195,4 +206,33 @@ void Adafruit_VL53L0X::printRangeStatus( VL53L0X_RangingMeasurementData_t* pRang
     Serial.print( F( " : " ) );
     Serial.println( buf );
 
+}
+
+
+boolean Adafruit_VL53L0X::getValidSingleRangingMeasurement(int &reading, bool &goodRange) {
+
+	VL53L0X_RangingMeasurementData_t measure;
+	rangingTest(&measure, false);
+	reading = measure.RangeMilliMeter;
+	if (measure.RangeStatus == 0 ) { // Valid!
+		goodRange = true;
+		return true;
+	}
+	else if (measure.RangeStatus == 1) { 
+		// Sigma fail will trigger particularly in ambient light, when the amount of ambient
+		// light is adding too much noise onto the ranging measurement.
+		goodRange = false;
+		return true;
+	}
+	else if (measure.RangeStatus == 2) {
+		// Signal fail will trigger when the return signal is too low to give enough
+		// confidence on the range measured.The limit will be given by either the signal
+		// limit or the RIT(Range Ignore Threshold).
+		goodRange = false;
+		return true;
+	}
+	else {
+		reading = -1;
+		return false;
+	}
 }
